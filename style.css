@@ -1,0 +1,133 @@
+.dates {
+    display: flex;
+    flex-direction: row;
+}
+
+td:hover {
+    background-color: rgb(213, 234, 180) !important;
+}
+
+.today {
+    background-color: aliceblue !important;
+}
+
+.upcoming-events .event-info {
+    display: flex;
+    flex-direction: column;
+    margin: 0% 2% 2% 2%;
+}
+
+.upcoming-events .event-info p {
+    font-size: .8em;
+}
+
+.upcoming-events .event-info h5 {
+    font-size: 1em;
+    margin-bottom: 1%;
+}
+
+.upcoming-events {
+    border: pink solid .2em;
+    border-radius: 1em;
+    padding: 5%;
+    background-color: #fff8f9;
+    box-shadow: -1px 2px 2px 1px #cacaca87;
+}
+
+.event-info {
+    margin: 5% 0;
+}
+
+.event-info h5 {
+    margin: 0;
+}
+
+#error-message {
+    color:red;
+}
+
+h5 {
+    margin: 0;
+    font-size: 1.2em;
+}
+
+p {
+    margin: 0 !important;
+}
+
+.calendar-header {
+    margin: auto;
+    text-align: center;
+}
+
+.edit, .delete {
+    font-size: .9em !important;
+}
+
+.delete.btn-danger {
+    background-color: #fd7373;
+    border-color: #fd7373;
+}
+
+.event-info .btn-group {
+    margin: 0 !important;
+}
+
+.add-button {
+    margin: 2% auto;
+
+}
+
+.events-div {
+    display: flex;
+    gap: 5%;
+    flex-wrap: wrap;
+}
+
+.todays-events {
+    margin-top: 5%;
+    border: #c0f9ff solid .2em;
+    border-radius: 1em;
+    padding: 5%;
+    background-color: #f3feff;
+    box-shadow: -1px 2px 2px 1px #cacaca87;
+}
+
+.todays-events .add {
+    margin-top: 5%;
+    background-color: #4aa0ca;
+    border-color: #4aa0ca;
+    box-shadow: -1px 1px 1px 1px #cacaca87;
+}
+
+.add-button.btn-primary {
+    background-color: #4aa0ca;
+    border-color: #4aa0ca;
+    box-shadow: -1px 1px 1px 1px #cacaca87;
+}
+
+.todays-events .add:hover, .add-button.btn-primary:hover {
+    background-color: #3b8fb8 !important;
+    border-color: #3b8fb8 !important;
+}
+
+.todays-events .add:active {
+    box-shadow: -1px 1px 1px 1px #9e9e9eb0;
+}
+
+#options .btn-primary {
+    background-color: #4aa0ca;
+    border-color: #4aa0ca;
+    box-shadow: -1px 1px 1px 1px #cacaca87;
+
+}
+
+.todays-events .btn-secondary {
+    background-color: #bbb;
+    border-color: #bbb;
+    color: black;
+}
+
+h1, h2, h3, h4, h5 {
+    font-family: 'Oswald';
+}
