@@ -81,6 +81,7 @@ function getChosenDate() {
     month = chosenMonth;
     year = chosenYear;
     displayCalendar();
+    displayHolidays(chosenYear);
     displayEventsInCalendar();
 
 }
@@ -400,8 +401,7 @@ function displayUpcomingEvents() {
     $(".events-div").html(eventHTML);
 }
 
-function displayHolidays() {
-    let currentYear = new Date().getFullYear();
+function displayHolidays(currentYear = new Date().getFullYear()) {
     $.get(`https://date.nager.at/api/v3/PublicHolidays/${currentYear}/us`, (data) => {
         for (let holiday of data) {
             let date = new Date(`${holiday.date}T00:00`);
@@ -409,7 +409,106 @@ function displayHolidays() {
             let month = date.getMonth();
             let year = date.getFullYear();
             events.push({name: holiday.name, date: `${monthNames[month]} ${day} ${year}`, startTime: "00:00", endTime: "23:59", details: "", category: "Holiday"});
-            testHoliday = {name: holiday.name, date: `${monthNames[month]} ${day} ${year}`, startTime: "00:00", endTime: "23:59", details: "", category: "Holiday"};
+        }
+    });
+
+    $.get(`https://date.nager.at/api/v3/PublicHolidays/${Number(currentYear) + 1}/us`, (data) => {
+        for (let holiday of data) {
+            let date = new Date(`${holiday.date}T00:00`);
+            let day = date.getDate();
+            let month = date.getMonth();
+            let year = date.getFullYear();
+            events.push({name: holiday.name, date: `${monthNames[month]} ${day} ${year}`, startTime: "00:00", endTime: "23:59", details: "", category: "Holiday"});
+        }
+    });
+
+    $.get(`https://date.nager.at/api/v3/PublicHolidays/${Number(currentYear) + 2}/us`, (data) => {
+        for (let holiday of data) {
+            let date = new Date(`${holiday.date}T00:00`);
+            let day = date.getDate();
+            let month = date.getMonth();
+            let year = date.getFullYear();
+            events.push({name: holiday.name, date: `${monthNames[month]} ${day} ${year}`, startTime: "00:00", endTime: "23:59", details: "", category: "Holiday"});
+        }
+    });
+
+    $.get(`https://date.nager.at/api/v3/PublicHolidays/${Number(currentYear) + 3}/us`, (data) => {
+        for (let holiday of data) {
+            let date = new Date(`${holiday.date}T00:00`);
+            let day = date.getDate();
+            let month = date.getMonth();
+            let year = date.getFullYear();
+            events.push({name: holiday.name, date: `${monthNames[month]} ${day} ${year}`, startTime: "00:00", endTime: "23:59", details: "", category: "Holiday"});
+        }
+    });
+
+    $.get(`https://date.nager.at/api/v3/PublicHolidays/${Number(currentYear) + 4}/us`, (data) => {
+        for (let holiday of data) {
+            let date = new Date(`${holiday.date}T00:00`);
+            let day = date.getDate();
+            let month = date.getMonth();
+            let year = date.getFullYear();
+            events.push({name: holiday.name, date: `${monthNames[month]} ${day} ${year}`, startTime: "00:00", endTime: "23:59", details: "", category: "Holiday"});
+        }
+    });
+
+    $.get(`https://date.nager.at/api/v3/PublicHolidays/${Number(currentYear) + 5}/us`, (data) => {
+        for (let holiday of data) {
+            let date = new Date(`${holiday.date}T00:00`);
+            let day = date.getDate();
+            let month = date.getMonth();
+            let year = date.getFullYear();
+            events.push({name: holiday.name, date: `${monthNames[month]} ${day} ${year}`, startTime: "00:00", endTime: "23:59", details: "", category: "Holiday"});
+        }
+    });
+
+    $.get(`https://date.nager.at/api/v3/PublicHolidays/${Number(currentYear) + 6}/us`, (data) => {
+        for (let holiday of data) {
+            let date = new Date(`${holiday.date}T00:00`);
+            let day = date.getDate();
+            let month = date.getMonth();
+            let year = date.getFullYear();
+            events.push({name: holiday.name, date: `${monthNames[month]} ${day} ${year}`, startTime: "00:00", endTime: "23:59", details: "", category: "Holiday"});
+        }
+    });
+
+    $.get(`https://date.nager.at/api/v3/PublicHolidays/${Number(currentYear) + 7}/us`, (data) => {
+        for (let holiday of data) {
+            let date = new Date(`${holiday.date}T00:00`);
+            let day = date.getDate();
+            let month = date.getMonth();
+            let year = date.getFullYear();
+            events.push({name: holiday.name, date: `${monthNames[month]} ${day} ${year}`, startTime: "00:00", endTime: "23:59", details: "", category: "Holiday"});
+        }
+    });
+
+    $.get(`https://date.nager.at/api/v3/PublicHolidays/${Number(currentYear) + 8}/us`, (data) => {
+        for (let holiday of data) {
+            let date = new Date(`${holiday.date}T00:00`);
+            let day = date.getDate();
+            let month = date.getMonth();
+            let year = date.getFullYear();
+            events.push({name: holiday.name, date: `${monthNames[month]} ${day} ${year}`, startTime: "00:00", endTime: "23:59", details: "", category: "Holiday"});
+        }
+    });
+
+    $.get(`https://date.nager.at/api/v3/PublicHolidays/${Number(currentYear) + 9}/us`, (data) => {
+        for (let holiday of data) {
+            let date = new Date(`${holiday.date}T00:00`);
+            let day = date.getDate();
+            let month = date.getMonth();
+            let year = date.getFullYear();
+            events.push({name: holiday.name, date: `${monthNames[month]} ${day} ${year}`, startTime: "00:00", endTime: "23:59", details: "", category: "Holiday"});
+        }
+    });
+
+    $.get(`https://date.nager.at/api/v3/PublicHolidays/${Number(currentYear) + 10}/us`, (data) => {
+        for (let holiday of data) {
+            let date = new Date(`${holiday.date}T00:00`);
+            let day = date.getDate();
+            let month = date.getMonth();
+            let year = date.getFullYear();
+            events.push({name: holiday.name, date: `${monthNames[month]} ${day} ${year}`, startTime: "00:00", endTime: "23:59", details: "", category: "Holiday"});
         }
         
         if (localStorage.getItem("events") === null) {
