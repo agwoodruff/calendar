@@ -480,7 +480,7 @@ function displayEventsInCalendar(categories = [...categoryList.keys()]) {
 
     let monthEvents = events.filter(function(event) {
         let tempDate = new Date(event.date);
-        return (tempDate.getMonth() == date.getMonth());
+        return (tempDate.getMonth() == date.getMonth() && tempDate.getFullYear() == date.getFullYear());
     });
 
     for (let event of monthEvents) {
