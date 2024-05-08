@@ -1,4 +1,7 @@
-var events = [{name: "Movie", date: "April 30 2024", startTime: "14:30", endTime: "16:00", details: "At AMC"}, {name: "Math Class", date: "April 30 2024", startTime: "8:30", endTime: "10:00", details: "test today"}, {name: "Class", date: "April 19 2024", startTime: "12:30", endTime: "13:30", details: ""}];
+var categoryList = new Map([["None", "transparent"], ["Friends", "pink"], ["School", "#60c1f0"], ["Holiday", "#b8b8ea"], ["Other", "green"]]);
+let categoriesFiltered = new Map(categoryList);
+
+var events = [{name: "Movie", date: "May 29 2024", startTime: "14:30", endTime: "16:00", details: "At AMC", category: "Friends"}, {name: "Math Class", date: "May 30 2024", startTime: "8:30", endTime: "10:00", details: "test today", category: "School"}, {name: "Class", date: "May 7 2024", startTime: "12:30", endTime: "13:30", details: "", category: "School"}, {name: "Star Wars Day", date: "May 4 2024", startTime: "14:30", endTime: "16:00", details: "", category: "Other"}];
 
 let date = new Date();
 const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
@@ -7,10 +10,10 @@ const dayNames = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Frida
 let month = monthNames[date.getMonth()];
 let day = new Date().getDate();
 let year = date.getFullYear();
+let lengthOfMonth;
 
 // display Calendar on page
 function displayCalendar() {
-    let lengthOfMonth;
     let firstDayOfMonth = new Date(`${month} 1 ${year}`);
     firstDayOfMonth = firstDayOfMonth.getDay();
 
@@ -49,9 +52,9 @@ function displayCalendar() {
         }
 
         if (((i + 1) == day) && (year == new Date().getFullYear()) && (date.getMonth() == new Date().getMonth())) {
-            calendarDateHTML += `<td class="today">${i+1}</td>`;
+            calendarDateHTML += `<td class="today"><h6>${i+1}</h6></td>`;
         } else {
-            calendarDateHTML += `<td>${i+1}</td>`;
+            calendarDateHTML += `<td><h6>${i+1}</h6></td>`;
         }
         dayCount += 1;
         if (dayCount > 6) {
@@ -78,6 +81,7 @@ function getChosenDate() {
     month = chosenMonth;
     year = chosenYear;
     displayCalendar();
+    displayEventsInCalendar();
 
 }
 
@@ -91,6 +95,7 @@ function sanitizeInput(val) {
 function addEvent(day) {
     // get values
     let nameVal = sanitizeInput($("#name").val());
+    let catVal = $("#category").children("option:selected").val();
     let stVal = $("#start-time").val();
     let etVal = $("#end-time").val();
     let detailVal = sanitizeInput($("#details").val()); 
@@ -114,23 +119,25 @@ function addEvent(day) {
         $("#start-time").css({"border": "none"});
         $("#end-time").css({"border": "none"});
         // Add new event to events array
-        events.push({name: nameVal, date: `${month} ${day} ${year}`, startTime: stVal, endTime: etVal, details: detailVal});
+        events.push({name: nameVal, date: `${month} ${day} ${year}`, startTime: stVal, endTime: etVal, details: detailVal, category: catVal});
         // get rid of add events form
         $(".add-event").html("");
+        localStorage.setItem("events", JSON.stringify(events));
     }
 }
 
-// remove event from events div
+// remove event from events array
 // update page so event isn't displayed anymore
 function deleteEvent(index) {
     events.splice(index, 1);
+    localStorage.setItem("events", JSON.stringify(events));
     displayUpcomingEvents();
 }
 
 // get info of event being edited and display that in form for user to edit
 function editEvent(index, parent) {
     // get info for event from events array
-    let {name, date, startTime: sTime, endTime: eTime, details} = events[index];
+    let {name, date, startTime: sTime, endTime: eTime, details, category: categoryName} = events[index];
 
     // format date and times in way form will understand
     // convert month name to number and add zero if month is single digit
@@ -142,8 +149,19 @@ function editEvent(index, parent) {
     sTime = (sTime[1] == ":") ? (`0${sTime}`) : sTime;
     eTime = (eTime[1] == ":") ? (`0${eTime}`) : eTime;
 
+    let categoryHTML = `<select class="form-select" id="category">`;
+    for (category of [...categoryList.keys()]) {
+        if (categoryName == category) {
+            categoryHTML += `<option value="${category}" selected>${category}</option>`;
+        } else {
+            categoryHTML += `<option value="${category}">${category}</option>`;
+        }
+    }
+    categoryHTML += `</select>`;
+
     // create form to edit event
     let editHTML = `<input class="form-control" name="event-name" id="event-name" type="text" value="${name}">
+                    ${categoryHTML}
                     <input class="form-control" name="event-date" id="event-date" value="${year}-${month}-${day}" type="date">
                     <input class="form-control" name="event-start-time" id="event-start-time" type="time" value="${sTime}">
                     <input class="form-control" name="event-end-time" id="event-end-time" type="time" value="${eTime}">
@@ -161,6 +179,10 @@ function getEvents(day) {
     let todayIndex = [];
     let todaysEvents = [];
 
+    if (localStorage.getItem("events") != null) {
+        events = JSON.parse(localStorage.getItem("events"));
+    }
+
     events.forEach(function(event, index) {
         if (eventDay == event.date) {
             todayIndex.push(index); // keep track of index of event in events array
@@ -172,25 +194,13 @@ function getEvents(day) {
 
     // create event-info div for each event
     for (let i = 0; i < todaysEvents.length; i++) {
-        let {name, date, startTime, endTime, details} = todaysEvents[i];
-        let st = Number(startTime.slice(0,2));
-        let et = Number(endTime.slice(0,2));
-        let stString, etString;
-
-        if (st > 12) {
-            stString = `${st - 12}${startTime.slice(2)} PM`;
-        } else {
-            stString = `${startTime} AM`;
-        }
-
-        if (et > 12) {
-            etString = `${et - 12}${endTime.slice(2)} PM`;
-        } else {
-            etString = `${endTime} AM`;
-        }
+        let {name, date, startTime, endTime, details, category} = todaysEvents[i];
+        let stString = formatTime(startTime);
+        let etString = formatTime(endTime);
 
         eventHTML += `<div class="event-info"> <h5 id="event-name">${name}</h5>
         <p id="event-date">${date.slice(0, -5)},${date.slice(-5)}</p>
+        <p id="event-category">Category: ${category}</p>
         <p id="event-time">${stString}-${etString}</p>
         <p id="event-details"> Details: ${details} </p>
         <span class="row btn-group col-6">
@@ -215,6 +225,7 @@ $(document).on('click', '.delete', function(event) {
     var index = $(this).attr('id');
     deleteEvent(index);
     $(this).parent().parent()[0].remove();
+    displayEventsInCalendar();
 });
 
 $(document).on('click', '.edit', function(event) {
@@ -227,6 +238,25 @@ $(document).on('click', '.edit', function(event) {
     editEvent(index, parent);
 });
 
+function formatTime(timeString) {
+    let st = Number(timeString.slice(0,2));
+    let stString;
+
+    if (st > 12) {
+        stString = `${st - 12}${timeString.slice(2)} PM`;
+    } else if (st == 12) {
+        stString = `${timeString} PM`;
+    } else {
+        if (st == "00") {
+            stString = `12:${timeString.slice(3)} AM`;
+        } else {
+            stString = `${timeString} AM`;
+        }
+    }
+
+    return stString;
+} 
+
 // update event after user has edited it
 $(document).on('click', '.update', function(event) {
     // get index of event in events array
@@ -237,6 +267,7 @@ $(document).on('click', '.update', function(event) {
     let sTime = $(this).parent().children("#event-start-time").val();
     let eTime = $(this).parent().children("#event-end-time").val();
     let details = sanitizeInput($(this).parent().children("#event-details").val());
+    let category = $(this).parent().children("#category").val();
     let errorMessage = $("#error-message");
 
     let year = date.slice(0,4);
@@ -245,10 +276,14 @@ $(document).on('click', '.update', function(event) {
 
     date = `${month} ${day} ${year}`;
 
+    let stString = formatTime(sTime);
+    let etString = formatTime(eTime);
+
     // replace form with div displaying event information
     let eventHTML = `<h5 id="event-name">${name}</h5>
         <p id="event-date">${month} ${day}, ${year}</p>
-        <p id="event-time">${sTime}-${eTime}</p>
+        <p id="event-category">Category: ${category}</p>
+        <p id="event-time">${stString}-${etString}</p>
         <p id="event-details"> Details: ${details} </p>
         <span class="row btn-group col-6">
         <input type="button" class="edit btn btn-secondary col-3" id="${index}" value="Edit"> 
@@ -281,19 +316,29 @@ $(document).on('click', '.update', function(event) {
         $("#event-end-time").css({"border": "none"});
         $("#event-date").css({"border": "none"});
         errorMessage.html("");
-        events[index] = {name: name, date: date, startTime: sTime, endTime: eTime, details: details};
+        events[index] = {name: name, date: date, startTime: sTime, endTime: eTime, details: details, category: category};
+        localStorage.setItem("events", JSON.stringify(events));
         $(this).parent().html(eventHTML);
         displayUpcomingEvents();
+        displayEventsInCalendar();
     }
 });
 
 // adds event form when user clicks add event
 $(document).on('click', '.add', function(event) {
     let day = $(this).attr('id');
+    let options = ``;
+    for (let [category, color] of categoryList) {
+        options += `<option value="${category}">${category}</option>`;
+    }
     $(".add-event").html(`<h3> Add Event </h3>
         <span id="event-date">Date: ${month} ${day}, ${year}</span> <br>
         <label for="name">Name:</label>
         <input class="form-control" name="name" id="name" type="text">
+        <label for="category">Category:</label>
+        <select class="form-control" id="category" name="category">
+        ${options}
+        </select>
         <label for="start-time">Start Time:</label>
         <input class="form-control" type="time" name="start-time" id="start-time">
         <label>End Time:</label>
@@ -320,13 +365,19 @@ $(document).on('click', 'td', function(event) {
     $(this).css("background-color", "rgb(169, 196, 125)");
 
     // show events for given day
-    getEvents($(this).text());
-    $(".add-event").html("");
+    let day = $(this).children("h6").text();
+    if (day != "") {
+        getEvents($(this).children("h6").text());
+        $(".add-event").html("");
+    }
 });
 
 // shows events occurring within the next week & current month in events div on page
 function displayUpcomingEvents() {
     let eventHTML = "";
+    if (localStorage.getItem("events") != null) {
+        events = JSON.parse(localStorage.getItem("events"));
+    }
 
     let upcomingEvents = events.filter(function(event) {
         let tempDate = new Date(event.date);
@@ -336,29 +387,122 @@ function displayUpcomingEvents() {
     });
 
     for (let event of upcomingEvents) {
-        let {name, date, startTime, endTime, details} = event;
-        let st = Number(startTime.slice(0,2));
-        let et = Number(endTime.slice(0,2));
-        let stString, etString;
-
-        if (st > 12) {
-            stString = `${st - 12}${startTime.slice(2)} PM`;
-        } else {
-            stString = `${startTime} AM`;
-        }
-
-        if (et > 12) {
-            etString = `${et - 12}${endTime.slice(2)} PM`;
-        } else {
-            etString = `${endTime} AM`;
-        }
+        let {name, date, startTime, endTime, details, category} = event;
+        let stString = formatTime(startTime);
+        let etString = formatTime(endTime);
 
         eventHTML += `<div class="event-info"> <h5>${name}</h5>
         <p>${date.slice(0, -5)},${date.slice(-5)} </p>
+        <p id="event-category">Category: ${category}</p>
         <p>${stString}-${etString} </p>
         <p>Details: ${details}</p></div>`;
     }
     $(".events-div").html(eventHTML);
+}
+
+function displayHolidays() {
+    let currentYear = new Date().getFullYear();
+    $.get(`https://date.nager.at/api/v3/PublicHolidays/${currentYear}/us`, (data) => {
+        for (let holiday of data) {
+            let date = new Date(`${holiday.date}T00:00`);
+            let day = date.getDate();
+            let month = date.getMonth();
+            let year = date.getFullYear();
+            events.push({name: holiday.name, date: `${monthNames[month]} ${day} ${year}`, startTime: "00:00", endTime: "23:59", details: "", category: "Holiday"});
+            testHoliday = {name: holiday.name, date: `${monthNames[month]} ${day} ${year}`, startTime: "00:00", endTime: "23:59", details: "", category: "Holiday"};
+        }
+        
+        if (localStorage.getItem("events") === null) {
+            localStorage.setItem("events", JSON.stringify(events));  
+        }
+
+        displayUpcomingEvents();
+        displayEventsInCalendar();
+    });
+}
+
+// show list of category on page
+function displayCategories() {
+    let categoryHTML = ``;
+    if (localStorage.getItem("categories") != null) {
+        categoryList = new Map(JSON.parse(localStorage.categories));    
+    }
+
+    categoryList.forEach((color, name) => {
+        categoryHTML += `<div><input type="checkbox" name="${name}" id="${name}" checked> <label style="color: ${color=="transparent" ? "black" : color}" for="${name}">${name}</label></div>`;
+    });
+    categoryHTML += `<div class="col cat-input"><label for="cat-name" class="form-label">Add category:</label><input type="color" id="cat-color" name="cat-color" class="form-control"><input type="text" name="cat-name" id="cat-name" class="form-control"><button id="add-cat" class="btn btn-primary">Add</button></div>`;
+    $(".category-filter").html(categoryHTML);
+    $("input[type='checkbox']").each(function() {
+        this.addEventListener("change", filterCategory);
+    })
+    $("#add-cat")[0].addEventListener('click', addCategory);
+}
+
+function addCategory() {
+    let catName = sanitizeInput($(this).parent().children("#cat-name").val());
+    let catColor = $(this).parent().children("#cat-color").val();
+    if (catName != "") {
+        categoryList.set(catName, catColor);
+        $(this).parent().children("#cat-name").val("");
+        displayCategories(); 
+        localStorage.categories = JSON.stringify(Array.from(categoryList.entries()));  
+    }
+}
+
+function editCategory() {
+
+}
+
+function deleteCategory() {
+
+}
+
+function repeatingEvents() {
+
+}
+
+// show only events with category name when checkbox is clicked
+function filterCategory(e) {
+    let checked = e.target.checked;
+    let name = e.target.name;
+    if (!checked) {
+        categoriesFiltered.delete(name);
+    }
+    if (checked) {
+        categoriesFiltered.set(name, "");
+    }
+    displayEventsInCalendar([...categoriesFiltered.keys()]);
+}
+
+function displayEventsInCalendar(categories = [...categoryList.keys()]) {
+    $("td .event").remove();
+
+    let monthEvents = events.filter(function(event) {
+        let tempDate = new Date(event.date);
+        return (tempDate.getMonth() == date.getMonth());
+    });
+
+    for (let event of monthEvents) {
+        let tempDate = new Date(event.date);
+        let td = $("td h6").filter(function(el) {
+            var html = $("td h6")[el].innerHTML;
+            return (html == tempDate.getDate());
+        })
+        if (categories.includes(event.category)) {
+            td.parent().append(`<div style="background-color:${categoryList.get(event.category)}" class="event">${event.name}</div>`);
+        }
+    }
+}
+
+function getLocalStorage() {
+    if (localStorage.getItem("events") === null) {
+        //localStorage.setItem("events", JSON.stringify(events));  
+    }
+
+    if (localStorage.getItem("categories") === null) {
+        localStorage.categories = JSON.stringify(Array.from(categoryList.entries()));
+    }
 }
 
 $(document).ready(function() {
@@ -397,4 +541,9 @@ $(document).ready(function() {
     // display calendar and events on page
     displayCalendar();
     displayUpcomingEvents();
+    displayEventsInCalendar();
+    displayCategories();
+
+    getLocalStorage();
+    displayHolidays();
 });
