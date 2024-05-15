@@ -1,4 +1,4 @@
-var categoryList = new Map([["None", "transparent"], ["Friends", "pink"], ["School", "#60c1f0"], ["Holiday", "#b8b8ea"], ["Other", "green"]]);
+var categoryList = new Map([["None", "transparent"], ["Friends", "#FFC0CB"], ["School", "#60c1f0"], ["Holiday", "#b8b8ea"], ["Other", "#378805"]]);
 let categoriesFiltered = new Map(categoryList);
 
 var events = [{name: "Movie", date: "May 29 2024", startTime: "14:30", endTime: "16:00", details: "At AMC", category: "Friends"}, {name: "Math Class", date: "May 30 2024", startTime: "8:30", endTime: "10:00", details: "test today", category: "School"}, {name: "Class", date: "May 7 2024", startTime: "12:30", endTime: "13:30", details: "", category: "School"}, {name: "Star Wars Day", date: "May 4 2024", startTime: "14:30", endTime: "16:00", details: "", category: "Other"}];
@@ -528,14 +528,17 @@ function displayCategories() {
     }
 
     categoryList.forEach((color, name) => {
-        categoryHTML += `<div><input type="checkbox" name="${name}" id="${name}" checked> <label style="color: ${color=="transparent" ? "black" : color}" for="${name}">${name}</label></div>`;
+        if (name == "None") {
+            categoryHTML += `<div class="cat-group"><input type="checkbox" name="${name}" id="${name}" checked> <label style="color: ${color=="transparent" ? "black" : color}" for="${name}">${name}</label><i></i><i></i></div>`;
+        } else {
+            categoryHTML += `<div class="cat-group"><input type="checkbox" name="${name}" id="${name}" checked> <label style="color: ${color=="transparent" ? "black" : color}" for="${name}">${name}</label><i class="fa-solid fa-pen"></i><i class="fa-solid fa-xmark"></i></div>`;
+        }
     });
-    categoryHTML += `<div class="col cat-input"><label for="cat-name" class="form-label">Add category:</label><input type="color" id="cat-color" name="cat-color" class="form-control"><input type="text" name="cat-name" id="cat-name" class="form-control"><button id="add-cat" class="btn btn-primary">Add</button></div>`;
+    categoryHTML += `<div class="col cat-input"><i class="fa-solid fa-plus"></i></div>`;
     $(".category-filter").html(categoryHTML);
     $("input[type='checkbox']").each(function() {
         this.addEventListener("change", filterCategory);
     })
-    $("#add-cat")[0].addEventListener('click', addCategory);
 }
 
 function addCategory() {
@@ -543,23 +546,73 @@ function addCategory() {
     let catColor = $(this).parent().children("#cat-color").val();
     if (catName != "") {
         categoryList.set(catName, catColor);
-        $(this).parent().children("#cat-name").val("");
+        localStorage.categories = JSON.stringify(Array.from(categoryList.entries()));
         displayCategories(); 
-        localStorage.categories = JSON.stringify(Array.from(categoryList.entries()));  
     }
 }
 
-function editCategory() {
+let tempCat;
 
-}
+// allow user to edit category when edit button (pencil icon) is clicked
+$(document).on('click', '.fa-pen', function(event) {
+    let catName = $(event.target).parent().find('label').html();
+    let catColor = categoryList.get(catName);
 
-function deleteCategory() {
+    $(event.target).parent().html(`<input name="cat-name" id="cat-name" class="form-control" type="text" value=${catName} /><input type="color" name="cat-color" id="cat-color" value=${catColor} /><i class="fa-solid fa-check"></i><i class="fa-solid fa-xmark"></i>`);
+    
+    tempCat = catName;
+    $('.cat-group *input[id=cat-name]').each(function(index, el) {
+        let name = el.value;
+        let color = $(el).next().val();
 
-}
+        if (name != catName) {
+            $(el).parent().html(`<input type="checkbox" name="${name}" id="${name}" checked> <label style="color: ${color=="transparent" ? "black" : color}" for="${name}">${name}</label><i class="fa-solid fa-pen"></i><i class="fa-solid fa-xmark"></i>`);
+        }
+    });
+});
 
-function repeatingEvents() {
+// save changes to category name and color when user clicks checkmark icon
+$(document).on('click', '.fa-check', function(event) {
+    categoryList.delete(tempCat);
+    let catName = $(event.target).parent().find('#cat-name').val();
+    let catColor = $(event.target).parent().find('#cat-color').val();
+    $(event.target).parent().html(`<input type="checkbox" name="${catName}" id="${catName}" checked> <label style="color: ${catColor=="transparent" ? "black" : catColor}" for="${catName}">${catName}</label><i class="fa-solid fa-pen"></i><i class="fa-solid fa-xmark"></i>`);
 
-}
+    categoryList.set(catName, catColor);
+    localStorage.categories = JSON.stringify(Array.from(categoryList.entries()));
+
+    for (event of events) {
+        if (event.category == tempCat) {
+            event.category = catName;
+        }
+    }
+
+    localStorage.setItem("events", JSON.stringify(events));
+    displayEventsInCalendar();
+});
+
+$(document).on('click', '.fa-xmark', function(event) {
+    let catName = $(event.target).parent().find('label').html();
+    categoryList.delete(catName);
+    localStorage.categories = JSON.stringify(Array.from(categoryList.entries()));
+    displayCategories();
+
+    for (event of events) {
+        if (event.category == catName) {
+            event.category = "None";
+        }
+    }
+
+    localStorage.setItem("events", JSON.stringify(events));
+    displayEventsInCalendar();
+});
+
+$(document).on('click', '.fa-plus', function(event) {
+    let addform = `<div class="col cat-input"><input type="color" id="cat-color" value="#808080" name="cat-color" class="form-control"><input type="text" name="cat-name" id="cat-name" class="form-control"><button id="add-cat" class="btn btn-primary">Add</button></div>`;
+    $(".fa-plus").after(addform);
+    $("#add-cat")[0].addEventListener('click', addCategory);
+});
+
 
 // show only events with category name when checkbox is clicked
 function filterCategory(e) {
@@ -595,10 +648,6 @@ function displayEventsInCalendar(categories = [...categoryList.keys()]) {
 }
 
 function getLocalStorage() {
-    if (localStorage.getItem("events") === null) {
-        //localStorage.setItem("events", JSON.stringify(events));  
-    }
-
     if (localStorage.getItem("categories") === null) {
         localStorage.categories = JSON.stringify(Array.from(categoryList.entries()));
     }

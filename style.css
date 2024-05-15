@@ -7,6 +7,11 @@ td:hover {
     background-color: rgb(213, 234, 180) !important;
 }
 
+td {
+    height: 8em;
+    width: 8em;
+}
+
 .today {
     background-color: aliceblue !important;
 }
@@ -115,7 +120,7 @@ p {
     box-shadow: -1px 1px 1px 1px #9e9e9eb0;
 }
 
-#options .btn-primary {
+.btn-primary {
     background-color: #4aa0ca;
     border-color: #4aa0ca;
     box-shadow: -1px 1px 1px 1px #cacaca87;
@@ -130,4 +135,62 @@ p {
 
 h1, h2, h3, h4, h5 {
     font-family: 'Oswald';
+}
+
+td .event {
+    background-color: #3b8fb8;
+    border-radius: 1em;
+    margin: 5% auto;
+    padding: 1% 5%;
+    font-size: .8em;
+    text-align: center;
+}
+
+.categories {
+    border: pink solid .2em;
+    border-radius: 1em;
+    padding: 5%;
+    background-color: #fff8f9;
+    box-shadow: -1px 2px 2px 1px #cacaca87;
+    margin-top: 5%;
+}
+
+.cat-input {
+    display: flex;
+}
+
+.cat-input label {
+    margin: auto;
+}
+
+#cat-name {
+    width: 40%;
+}
+
+#cat-color {
+    width: 20%;
+}
+
+.category-filter div {
+    display: flex;
+    justify-content: space-between;
+    width: 60%;
+}
+
+.col.cat-input {
+    width: 90% !important;
+    justify-content: center !important;
+}
+
+input[type="color"] {
+    appearance: none;
+    -webkit-appearance: none;
+	border: none;
+	width: 2em !important;
+    height: 2em;
+    padding: 0;
+}
+
+.fa-plus {
+    margin: auto;
 }
