@@ -12,13 +12,22 @@
     <title>Calendar</title>
 </head>
 <body class="container">
+    <div class="calendar-view">
+        <button class="day-button btn btn-primary">Day</button>
+        <button class="week-button btn btn-primary">Week</button>
+        <button class="month-button btn btn-primary selected-button">Month</button>
+    </div>
     <div class="calendar-header">
-        <h1>Calendar - <span id="current-date"></span></h1>
+        <i class="fa-solid fa-chevron-left"></i>
+        <h1><span id="current-date"></span></h1>
+        <i class="fa-solid fa-chevron-right"></i>
     </div>
     <div class="row">
         <div class="col-lg-9">
+            <!--
             <div id="options" class="row col-lg-4">
             </div>
+            -->
             <div class="calendar col-lg-12">
             </div>
         </div>
