@@ -12,13 +12,12 @@ let day = new Date().getDate();
 let year = date.getFullYear();
 let lengthOfMonth;
 
-// display Calendar on page
-function displayCalendar() {
-    let firstDayOfMonth = new Date(`${month} 1 ${year}`);
-    firstDayOfMonth = firstDayOfMonth.getDay();
+let calendarView = "month";
 
+function getMonthLength(index) {
     // figure out number of days in current month
-    switch (date.getMonth()) {
+    let lengthOfMonth;
+    switch (index) {
         case 8:
         case 3:
         case 5:
@@ -38,6 +37,16 @@ function displayCalendar() {
             lengthOfMonth = 31;
             break;
     }
+    return lengthOfMonth;
+}
+
+// display Calendar on page
+function displayCalendarMonth() {
+    let firstDayOfMonth = new Date(`${month} 1 ${year}`);
+    firstDayOfMonth = firstDayOfMonth.getDay();
+
+    // figure out number of days in current month
+    lengthOfMonth = getMonthLength(date.getMonth());
 
     let calendarDateHTML = `<table class="table col-12"><tr><th>${dayNames[0]}</th><th>${dayNames[1]}</th><th>${dayNames[2]}</th><th>${dayNames[3]}</th><th>${dayNames[4]}</th><th>${dayNames[5]}</th><th>${dayNames[6]}</th></tr>`;
     calendarDateHTML += "<tr>";
@@ -72,6 +81,78 @@ function displayCalendar() {
 
 }
 
+function displayCalendarDay() {
+    $("#current-date").html(`${month} ${day}, ${year}`);
+
+    let hour = new Date().getHours();
+    let min = new Date().getMinutes();
+
+    let calendarHTML = `<hr class="current-time-line"/><table class="calendar-day"><tr><th></th><th>${dayNames[date.getDay()]} ${month} ${day}</th></tr>`;
+
+    for (let i = 0; i < 24; i++) {
+        let time = `${i} AM`;
+        if (i == 0) {
+            time = `12 AM`;
+        } else if (i == 12) {
+            time = `12 PM`;
+        } else if (i > 12) {
+            time = `${i - 12} PM`;
+        }
+        calendarHTML += `<tr><td class='time'><h4>${time}</h4></td><td></td></tr>`;
+    }
+
+    calendarHTML += `</table>`;
+    $('.calendar').html(calendarHTML);
+
+    let thHeight = $(".calendar-day th").height();
+    let height = $(".calendar-day").height() - thHeight;
+    let length = ((hour * 60) + min) / (24 * 60);
+    $(".current-time-line").css("top", `${thHeight + (height * length)}px`);
+}
+
+function displayCalendarWeek() {
+    let currentDate = `${month} ${year}`;
+    $("#current-date").html(currentDate);
+
+    let hour = new Date().getHours();
+    let min = new Date().getMinutes();
+    
+    lengthOfMonth = getMonthLength(date.getMonth());
+
+    let calendarHTML = `<hr class="current-time-line"/><table class="calendar-week"><tr><th></th>`;
+    for (let dayOfWeek = 0; dayOfWeek < 7; dayOfWeek++) {
+        let givenDate = day + (dayOfWeek - date.getDay());
+        if (givenDate > lengthOfMonth) {
+            givenDate -= lengthOfMonth;
+        } else if (givenDate == 0) {
+            givenDate = getMonthLength(date.getMonth() - 1);
+        } else if (givenDate < 0) {
+            givenDate = lengthOfMonth + givenDate;
+        }
+
+        calendarHTML += `<th class="${date.getDay() == dayOfWeek ? "current-day" : "other-day"}">${dayNames[dayOfWeek]} ${givenDate}</th>`;
+    }
+    calendarHTML += `</tr>`;
+
+    for (let i = 0; i < 24; i++) {
+        let time = `${i} AM`;
+        if (i == 0) {
+            time = `12 AM`;
+        } else if (i == 12) {
+            time = `12 PM`;
+        } else if (i > 12) {
+            time = `${i - 12} PM`;
+        }
+        calendarHTML += `<tr><td class='time'><h4>${time}</h4></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>`;
+    }
+
+    calendarHTML += `</table>`;
+    $('.calendar').html(calendarHTML);
+
+    $(".current-time-line").css("top", `${4.9 + (3 * hour) + (min/60 * 3)}em`);
+
+}
+
 // display calendar for month and year chosen with dropdown menu
 function getChosenDate() {
     let chosenMonth = $("#month")[0].value;
@@ -80,7 +161,7 @@ function getChosenDate() {
     date = new Date(`${chosenMonth} 1 ${chosenYear}`);
     month = chosenMonth;
     year = chosenYear;
-    displayCalendar();
+    displayCalendarMonth();
     displayHolidays(chosenYear);
     displayEventsInCalendar();
 
@@ -628,21 +709,83 @@ function filterCategory(e) {
 }
 
 function displayEventsInCalendar(categories = [...categoryList.keys()]) {
-    $("td .event").remove();
+    if (calendarView == "month") {
+        $("td .event").remove();
 
-    let monthEvents = events.filter(function(event) {
-        let tempDate = new Date(event.date);
-        return (tempDate.getMonth() == date.getMonth() && tempDate.getFullYear() == date.getFullYear());
-    });
+        let monthEvents = events.filter(function(event) {
+            let tempDate = new Date(event.date);
+            return (tempDate.getMonth() == date.getMonth() && tempDate.getFullYear() == date.getFullYear());
+        });
+    
+        for (let event of monthEvents) {
+            let tempDate = new Date(event.date);
+            let td = $("td h6").filter(function(el) {
+                var html = $("td h6")[el].innerHTML;
+                return (html == tempDate.getDate());
+            })
+            if (categories.includes(event.category)) {
+                td.parent().append(`<div style="background-color:${categoryList.get(event.category)}" class="event">${event.name}</div>`);
+            }
+        }
+    } else if (calendarView == "day") {
+        let dayEvents = events.filter(function(event) {
+            let tempDate = new Date(event.date);
+            return (tempDate.getMonth() == date.getMonth() && tempDate.getDate() == date.getDate() && tempDate.getFullYear() == date.getFullYear());
+        });
 
-    for (let event of monthEvents) {
-        let tempDate = new Date(event.date);
-        let td = $("td h6").filter(function(el) {
-            var html = $("td h6")[el].innerHTML;
-            return (html == tempDate.getDate());
-        })
-        if (categories.includes(event.category)) {
-            td.parent().append(`<div style="background-color:${categoryList.get(event.category)}" class="event">${event.name}</div>`);
+        for (let event of dayEvents) {
+            let startTime = event.startTime;
+            let hour = startTime.slice(0, -3);
+
+            let td = $("td.time").filter(function(el) {
+                var html = Number($("td.time h4")[el].innerHTML.slice(0, -3));
+                if ($("td.time h4")[el].innerHTML.slice(-2) == "PM" && html != 12) {
+                    html += 12;
+                } else if ($("td.time h4")[el].innerHTML.slice(-2) == "AM" && html == 12) {
+                    html = 0;
+                }
+                return (html == hour);
+            });
+
+            if (categories.includes(event.category)) {
+                td.closest('td').next('td').append(`<div style="background-color:${categoryList.get(event.category)}" class="event">${event.name}<br>${formatTime(event.startTime)}-${formatTime(event.endTime)}</div>`);
+            }
+
+        }
+    } else if (calendarView == "week") {
+        let days = [];
+        $("th").each((index, item) => {
+            let dayStr = $(item).html();
+            if (dayStr != "") {
+                days.push(Number(dayStr.slice(-2)));
+            }
+        });
+
+        let weekEvents = events.filter(function(event) {
+            let tempDate = new Date(event.date);
+            return (tempDate.getMonth() == date.getMonth() && days.includes(tempDate.getDate()) && tempDate.getFullYear() == date.getFullYear());
+        });
+
+        for (let event of weekEvents) {
+            let startTime = event.startTime;
+            let hour = startTime.slice(0, -3);
+            let tempDate = new Date(event.date);
+
+            let td = $("td.time").filter(function(el) {
+                var html = Number($("td.time h4")[el].innerHTML.slice(0, -3));
+                if ($("td.time h4")[el].innerHTML.slice(-2) == "PM" && html != 12) {
+                    html += 12;
+                } else if ($("td.time h4")[el].innerHTML.slice(-2) == "AM" && html == 12) {
+                    html = 0;
+                }
+                return (html == hour);
+            });
+
+            if (categories.includes(event.category)) {
+                let index = days.indexOf(tempDate.getDate());
+                let dateTd = td.parent().find(`td:eq(${index})`);
+                dateTd.closest('td').next('td').append(`<div style="background-color:${categoryList.get(event.category)}" class="event">${event.name}<br>${formatTime(event.startTime)}-${formatTime(event.endTime)}</div>`);
+            }
         }
     }
 }
@@ -653,41 +796,137 @@ function getLocalStorage() {
     }
 }
 
-$(document).ready(function() {
-    let yearNum = Number(new Date().getFullYear());
-    let monthNum = Number(new Date().getMonth());
 
-    // add month and year dropdown menu to page
-    let calendarHTML = `<select class="form-select col" id="month" name="month">`;
-
-    for (let m = 0; m < 12; m++) {
-        if (m == monthNum)
-            calendarHTML += `<option selected> ${monthNames[m]} </option>`;
-        else
-            calendarHTML += `<option> ${monthNames[m]} </option>`;
+$(document).on('dblclick', '.calendar td', function(event) {
+    let day = $(this).children("h6").text();
+    
+    let options = ``;
+    for (let [category, color] of categoryList) {
+        options += `<option value="${category}">${category}</option>`;
     }
-    
-    calendarHTML += `</select><select class="form-select col" id="year" name="year"> 
-    <option> ${yearNum} </option>
-    <option> ${yearNum + 1} </option>
-    <option> ${yearNum + 2} </option>
-    <option> ${yearNum + 3} </option>
-    <option> ${yearNum + 4} </option>
-    <option> ${yearNum + 5} </option>
-    <option> ${yearNum + 6} </option>
-    <option> ${yearNum + 7} </option>
-    <option> ${yearNum + 8} </option>
-    <option> ${yearNum + 9} </option>
-    <option> ${yearNum + 10} </option>
-    </select>`;
+    $(".add-event").html(`<h3> Add Event </h3>
+        <span id="event-date">Date: ${month} ${day}, ${year}</span> <br>
+        <label for="name">Name:</label>
+        <input class="form-control" name="name" id="name" type="text">
+        <label for="category">Category:</label>
+        <select class="form-control" id="category" name="category">
+        ${options}
+        </select>
+        <label for="start-time">Start Time:</label>
+        <input class="form-control" type="time" name="start-time" id="start-time">
+        <label>End Time:</label>
+        <input class="form-control" type="time" name="end-time" id="end-time">
+        <label for="details">Details (Optional):</label>
+        <textarea class="form-control" name="details" id="details"></textarea>
+        <span id="error-message"></span>
+        <button id="${day}" class="add-button btn btn-primary col-6">Add Event</button>`);
+});
 
-    calendarHTML += `<button class="btn btn-primary col-2" type="button" onclick="getChosenDate()">Go</button>`;
-
-    // add dropdowns and go button to options div above calendar
-    $("#options").html(calendarHTML);
+$(document).on('click', '.calendar-header .fa-chevron-left', function(event) {
+    if (calendarView == "month") {
+        let monthIndex = monthNames.indexOf(month);
+        if (monthIndex - 1 < 0) {
+            month = monthNames[11];
+            year -= 1;
+        } else {
+            month = monthNames[monthIndex - 1];
+        }
     
+        date = new Date(`${month} ${day} ${year}`);
+        displayCalendarMonth();
+        displayEventsInCalendar();
+    } else if (calendarView == "day") {
+        day -= 1;
+        date.setDate(day);
+        month = monthNames[date.getMonth()];
+        year = date.getFullYear();
+        day = date.getDate();
+        displayCalendarDay();
+        displayEventsInCalendar();
+
+    } else if (calendarView == "week") {
+        day -= 7;
+        date.setDate(day);
+        month = monthNames[date.getMonth()];
+        year = date.getFullYear();
+        day = date.getDate();
+        displayCalendarWeek();
+        displayEventsInCalendar();
+    }
+
+});
+
+$(document).on('click', '.calendar-header .fa-chevron-right', function(event) {
+    if (calendarView == "month") {
+        let monthIndex = monthNames.indexOf(month);
+        if (monthIndex + 1 > 11) {
+            month = monthNames[0];
+            year += 1;
+        } else {
+            month = monthNames[monthIndex + 1];
+        }
+    
+        date = new Date(`${month} ${day} ${year}`);
+        displayCalendarMonth();
+        displayEventsInCalendar();
+    } else if (calendarView == "day") {
+        day += 1;
+        date.setDate(day);
+        month = monthNames[date.getMonth()];
+        year = date.getFullYear();
+        day = date.getDate();
+        displayCalendarDay();
+        displayEventsInCalendar();
+    } else if (calendarView == "week") {
+        day += 7;
+        date.setDate(day);
+        month = monthNames[date.getMonth()];
+        year = date.getFullYear();
+        day = date.getDate();
+        displayCalendarWeek();
+        displayEventsInCalendar();
+    }
+
+});
+
+$(document).on('click', '.day-button', function(event) {
+    $(".day-button").addClass("selected-button");
+    $(".week-button").removeClass("selected-button");
+    $(".month-button").removeClass("selected-button");
+
+    $(".calendar").html("");
+    calendarView = "day";
+
+    displayCalendarDay();
+    displayEventsInCalendar();
+});
+
+$(document).on('click', '.week-button', function(event) {
+    $(".day-button").removeClass("selected-button");
+    $(".week-button").addClass("selected-button");
+    $(".month-button").removeClass("selected-button");
+
+    $(".calendar").html("");
+    calendarView = "week";
+
+    displayCalendarWeek();
+    displayEventsInCalendar();
+});
+
+$(document).on('click', '.month-button', function(event) {
+    $(".day-button").removeClass("selected-button");
+    $(".week-button").removeClass("selected-button");
+    $(".month-button").addClass("selected-button");
+
+    calendarView = "month";
+
+    displayCalendarMonth();
+    displayEventsInCalendar();
+});
+
+$(document).ready(function() {
     // display calendar and events on page
-    displayCalendar();
+    displayCalendarMonth();
     displayUpcomingEvents();
     displayEventsInCalendar();
     displayCategories();
